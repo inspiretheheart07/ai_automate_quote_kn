@@ -60,7 +60,7 @@ def generate_quote(env_vars):
 def create_image_and_video(music):
     """Create image and video based on the generated quote."""
     with open("quote_data.json", "r", encoding="utf-8") as quote_data:
-        image = TextImageGenerator('bg.png', './NotoSansKannadaUI-Bold.ttf', 'output_image.png')
+        image = TextImageGenerator('bg.png', 'font_kn.ttf', 'output_image.png')
         image.text_on_background(json.load(quote_data)['quote'])
         video = VideoCreator('output_image.png', f'{music}.mp3', output_video_path='output_video.mp4', duration=55)
         print((quote_data))
