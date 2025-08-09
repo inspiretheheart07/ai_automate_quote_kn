@@ -42,7 +42,7 @@ jobs:
         with:
           python-version: '3.11.0'
 
-      - name: Set up Python
+      - name: Set up apt
         uses: |
             sudo apt update
             sudo apt install --fix-missing
