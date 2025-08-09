@@ -43,7 +43,7 @@ jobs:
           python-version: '3.11.0'
 
       - name: Set up apt
-        uses: |
+        run: |
             sudo apt update
             sudo apt install --fix-missing
 
