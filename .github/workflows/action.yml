@@ -3,9 +3,7 @@ name: Python CI
 on:
   schedule:
     - cron: "30 1,3,5,7,9,11,13,15 * * *"
-  push:
-    branches:
-      - main
+
 jobs:
   build:
     runs-on: ubuntu-latest
