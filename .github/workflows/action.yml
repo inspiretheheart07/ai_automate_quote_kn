@@ -57,30 +57,7 @@ jobs:
         env:
            GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-              PACKAGE_NAME=ai_automate_quote
-              REPO_URL="https://$GH_TOKEN@github.com/simplycodesmart/automate_quote_ai.git"
-                  
-              echo "Checking if $PACKAGE_NAME is already installed..."
-              if python -c "import $PACKAGE_NAME" 2>/dev/null; then
-                echo "$PACKAGE_NAME is already installed. Checking for updates..."
-                INSTALLED_VERSION=$(pip show $PACKAGE_NAME | grep Version | awk '{print $2}')
-                echo "Installed version: $INSTALLED_VERSION"
-                  
-                echo "Checking latest version on GitHub..."
-                LATEST_VERSION=$(pip install --disable-pip-version-check --no-deps --upgrade --dry-run "git+$REPO_URL" 2>&1 \
-                  | grep 'Successfully built' -A 5 | grep 'Installing' | grep -oP '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
-                  
-                if [ "$INSTALLED_VERSION" == "$LATEST_VERSION" ]; then
-                  echo "✅ Latest version already installed. Skipping installation."
-                  exit 0
-                else
-                  echo "⚠️ New version available: $LATEST_VERSION → Updating..."
-                fi
-              else
-                echo "$PACKAGE_NAME is not installed. Installing..."
-              fi
-                  
-              pip install --upgrade --no-deps "git+$REPO_URL"
+          pip install git+https://$GH_TOKEN@github.com/simplycodesmart/automate_quote_ai.git
 
       - name: Install dependencies
         run: pip install -r requirements.txt
