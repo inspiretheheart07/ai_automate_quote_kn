@@ -54,11 +54,11 @@ jobs:
       - name: Upgrade pip
         run: python -m pip install --upgrade pip
 
-      - name: Install private repo only if not up-to-date
+      - name: Install private repo (always latest)
         env:
            GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          pip install git+https://$GH_TOKEN@github.com/simplycodesmart/automate_quote_ai.git
+          pip install --upgrade --force-reinstall git+https://$GH_TOKEN@github.com/simplycodesmart/automate_quote_ai.git
 
       - name: Install dependencies
         run: pip install -r requirements.txt
