@@ -1,6 +1,6 @@
 import json
 import os
-import random
+import sys
 from dotenv import load_dotenv
 from ai_automate_quote.quotes.generator import QuoteGenerator
 from ai_automate_quote.images.creator import TextImageGenerator
