@@ -12,6 +12,7 @@ from ai_automate_quote.upload.facebook import FacebookUploader
 from ai_automate_quote.upload.instagram import InstagramUploader
 from ai_automate_quote.upload.threads_upload import ThreadsUploader
 
+random_number = int(sys.argv[1])
 
 def load_environment_variables():
     """Load and return environment variables."""
@@ -106,7 +107,7 @@ def upload_to_platforms(quote_data):
 
 
 def main():
-        music = random.randint(101, 113)
+        music = random_number
         env_vars = load_environment_variables()
         download_files(music)
         generate_quote(env_vars)
