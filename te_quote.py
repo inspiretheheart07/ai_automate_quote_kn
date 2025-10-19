@@ -108,14 +108,14 @@ def upload_to_platforms(quote_data):
     inst = InstagramUploader(quote_data, os.getenv('FB_VERSION'), os.getenv('INSTA_PAGE_ID'), os.getenv('INSTA_PAGE_TOKEN'))
     inst.post_reel(video_url='output_video.mp4')
 
-    th = ThreadsUploader(
-        quote_data,
-        os.getenv('THREADS_VERSION'),
-        os.getenv('S3_URL'),
-        os.getenv('THREADS_PAGE_ID'),
-        os.getenv('THREADS_PAGE_TOKEN')
-    )
-    th.threads_post()
+    # th = ThreadsUploader(
+    #     quote_data,
+    #     os.getenv('THREADS_VERSION'),
+    #     os.getenv('S3_URL'),
+    #     os.getenv('THREADS_PAGE_ID'),
+    #     os.getenv('THREADS_PAGE_TOKEN')
+    # )
+    # th.threads_post()
     pin_upload(quote_data,yt)
 
 def pin_upload(quote_data,link):
