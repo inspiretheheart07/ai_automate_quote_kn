@@ -79,7 +79,7 @@ def create_image_and_video(music):
         quote_text = data['quote']
         image = TextImageGenerator('bg.png', 'font_kn.ttf', 'output_image.png')
         image.text_on_background(quote_text)
-        video = VideoCreator('output_image.png', f'{music}.mp3', output_video_path='output_video.mp4', duration=55)
+        video = VideoCreator('output_image.png', f'{music}.mp3', output_video_path='temp_output_video.mp4', duration=55)
         print((quote_data))
         video.create_video_with_music()
         tts_mixer = TextToAudioMixVideo(text=quote_text, music_path=f'{music}.mp3')
