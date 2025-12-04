@@ -72,38 +72,41 @@ jobs:
       - name: Install wheel from private repo release tag
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
-          RELEASE_TAG: ${{ secrets.VIONIX_TAG  }}
+          RELEASE_TAG: ${{ secrets.RELEASE_TAG }}
         run: |
           sudo apt-get update && sudo apt-get install -y jq
         
           OWNER="simplycodesmart"
           REPO="Vionix"
         
-          # Fetch list of assets in the specific release
-          API_URL="https://api.github.com/repos/$OWNER/$REPO/releases/tags/$RELEASE_TAG"
+          # Fetch release metadata
+          API_URL="https://api.github.com/repos/$OWNER/$REPO/releases/tags/0.1.0"
           RESPONSE=$(curl -s -H "Authorization: token $GH_TOKEN" "$API_URL")
         
-          echo "$RESPONSE"
+          # Get the actual wheel asset name
+          WHEEL_NAME=$(echo "$RESPONSE" | jq -r '.assets[] | select(.name | endswith(".whl")) | .name')
         
-          # Extract .whl download URL
-          WHEEL_URL=$(echo "$RESPONSE" | jq -r '.assets[] | select(.name | endswith(".whl")) | .url')
-        
-          if [ -z "$WHEEL_URL" ]; then
-            echo "Error: No .whl asset found in release tag $RELEASE_TAG"
+          if [ -z "$WHEEL_NAME" ]; then
+            echo "❌ No wheel asset found for release tag: $RELEASE_TAG"
             exit 1
           fi
         
-          echo "Found wheel asset: $WHEEL_URL"
+          echo "Found wheel: $WHEEL_NAME"
         
-          # Download using GitHub API headers (private release assets)
+          # Get the API download URL (NOT browser URL!)
+          WHEEL_URL=$(echo "$RESPONSE" | jq -r '.assets[] | select(.name == "'$WHEEL_NAME'") | .url')
+        
+          echo "Downloading via API: $WHEEL_URL"
+        
+          # Download correctly
           curl -L \
             -H "Authorization: token $GH_TOKEN" \
             -H "Accept: application/octet-stream" \
             "$WHEEL_URL" \
-            -o vionix.whl
+            -o "$WHEEL_NAME"
         
-          echo "Installing wheel…"
-          pip install ./vionix.whl
+          echo "Installing: $WHEEL_NAME"
+          pip install "$WHEEL_NAME"
 
       - name: Install private repo manually using GitHub token
         env:
