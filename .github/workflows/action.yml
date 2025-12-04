@@ -114,7 +114,7 @@ jobs:
         env:
            GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-           pip install https://simplycodesmart:$GH_TOKEN@github.com/simplycodesmart/Vionix/releases/download/0.1.0/vionix-0.1.0-py3.whl
+           pip install https://simplycodesmart:$GH_TOKEN@github.com/simplycodesmart/Vionix/releases/download/0.1.0/vionix-0.1.0-py3-none-any.whl
 
       - name: Install dependencies
         run: pip install -r requirements.txt
