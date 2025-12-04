@@ -69,46 +69,41 @@ jobs:
       - name: Upgrade pip
         run: python -m pip install --upgrade pip
 
-      # - name: Install latest wheel from private repo
-      #   env:
-      #     GH_TOKEN: ${{ secrets.GH_TOKEN }}
-      #   run: |
-      #     sudo apt-get update && sudo apt-get install -y jq
-      #     # 1. Use the GitHub Repository Contents API to get a list of files in the 'dist' folder.
-      #     # The API returns a JSON array of objects for each file.
-      #     API_URL="https://api.github.com/repos/simplycodesmart/automate_quote_ai/contents/dist"
-      #     RESPONSE=$(curl -s -H "Authorization: token $GH_TOKEN" "$API_URL")
-
-      #     echo "$RESPONSE"
-
-
-      #     if ! echo "$RESPONSE" | jq 'type' | grep -q '"array"'; then
-      #        echo "Error: GitHub API did not return a JSON array. Check token and repo access."
-      #        exit 1
-      #     fi
+      - name: Install wheel from private repo release tag
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          RELEASE_TAG: ${{ secrets.VIONIX_TAG  }}
+        run: |
+          sudo apt-get update && sudo apt-get install -y jq
         
-      #     # 2. Extract the download URL for the latest .whl file.
-      #     # We sort the filenames to get the latest version and take the first one.
-      #     WHEEL_URL=$(echo "$RESPONSE" | \
-      #       jq -r '.[] | select(.name | endswith(".whl")) | .download_url' | \
-      #       sort -r | head -n 1)
+          OWNER="simplycodesmart"
+          REPO="Vionix"
         
-      #     # 3. Handle the case where no wheel is found.
-      #     if [ -z "$WHEEL_URL" ]; then
-      #       echo "Error: No .whl file found in dist/."
-      #       exit 1
-      #     figh
+          # Fetch list of assets in the specific release
+          API_URL="https://api.github.com/repos/$OWNER/$REPO/releases/tags/$RELEASE_TAG"
+          RESPONSE=$(curl -s -H "Authorization: token $GH_TOKEN" "$API_URL")
         
-      #     echo "Downloading latest wheel from $WHEEL_URL"
+          echo "$RESPONSE"
         
-      #     # 4. Use pip to install directly from the fetched URL.
-      #     # pip can handle the authentication and download process automatically.
-      #     pip install "$WHEEL_URL"
-
-
-      # - name: Verify installation
-      #   run: |
-      #     python -c "import ai_automate_quote; print('Wheel installed successfully!')"
+          # Extract .whl download URL
+          WHEEL_URL=$(echo "$RESPONSE" | jq -r '.assets[] | select(.name | endswith(".whl")) | .url')
+        
+          if [ -z "$WHEEL_URL" ]; then
+            echo "Error: No .whl asset found in release tag $RELEASE_TAG"
+            exit 1
+          fi
+        
+          echo "Found wheel asset: $WHEEL_URL"
+        
+          # Download using GitHub API headers (private release assets)
+          curl -L \
+            -H "Authorization: token $GH_TOKEN" \
+            -H "Accept: application/octet-stream" \
+            "$WHEEL_URL" \
+            -o vionix.whl
+        
+          echo "Installing wheel…"
+          pip install ./vionix.whl
 
       - name: Install private repo manually using GitHub token
         env:
