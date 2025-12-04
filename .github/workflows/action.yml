@@ -69,46 +69,46 @@ jobs:
       - name: Upgrade pip
         run: python -m pip install --upgrade pip
 
-      - name: Install latest wheel from private repo
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          sudo apt-get update && sudo apt-get install -y jq
-          # 1. Use the GitHub Repository Contents API to get a list of files in the 'dist' folder.
-          # The API returns a JSON array of objects for each file.
-          API_URL="https://api.github.com/repos/simplycodesmart/automate_quote_ai/contents/dist"
-          RESPONSE=$(curl -s -H "Authorization: token $GH_TOKEN" "$API_URL")
+      # - name: Install latest wheel from private repo
+      #   env:
+      #     GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      #   run: |
+      #     sudo apt-get update && sudo apt-get install -y jq
+      #     # 1. Use the GitHub Repository Contents API to get a list of files in the 'dist' folder.
+      #     # The API returns a JSON array of objects for each file.
+      #     API_URL="https://api.github.com/repos/simplycodesmart/automate_quote_ai/contents/dist"
+      #     RESPONSE=$(curl -s -H "Authorization: token $GH_TOKEN" "$API_URL")
 
-          echo "$RESPONSE"
+      #     echo "$RESPONSE"
 
 
-          if ! echo "$RESPONSE" | jq 'type' | grep -q '"array"'; then
-             echo "Error: GitHub API did not return a JSON array. Check token and repo access."
-             exit 1
-          fi
+      #     if ! echo "$RESPONSE" | jq 'type' | grep -q '"array"'; then
+      #        echo "Error: GitHub API did not return a JSON array. Check token and repo access."
+      #        exit 1
+      #     fi
         
-          # 2. Extract the download URL for the latest .whl file.
-          # We sort the filenames to get the latest version and take the first one.
-          WHEEL_URL=$(echo "$RESPONSE" | \
-            jq -r '.[] | select(.name | endswith(".whl")) | .download_url' | \
-            sort -r | head -n 1)
+      #     # 2. Extract the download URL for the latest .whl file.
+      #     # We sort the filenames to get the latest version and take the first one.
+      #     WHEEL_URL=$(echo "$RESPONSE" | \
+      #       jq -r '.[] | select(.name | endswith(".whl")) | .download_url' | \
+      #       sort -r | head -n 1)
         
-          # 3. Handle the case where no wheel is found.
-          if [ -z "$WHEEL_URL" ]; then
-            echo "Error: No .whl file found in dist/."
-            exit 1
-          figh
+      #     # 3. Handle the case where no wheel is found.
+      #     if [ -z "$WHEEL_URL" ]; then
+      #       echo "Error: No .whl file found in dist/."
+      #       exit 1
+      #     figh
         
-          echo "Downloading latest wheel from $WHEEL_URL"
+      #     echo "Downloading latest wheel from $WHEEL_URL"
         
-          # 4. Use pip to install directly from the fetched URL.
-          # pip can handle the authentication and download process automatically.
-          pip install "$WHEEL_URL"
+      #     # 4. Use pip to install directly from the fetched URL.
+      #     # pip can handle the authentication and download process automatically.
+      #     pip install "$WHEEL_URL"
 
 
-      - name: Verify installation
-        run: |
-          python -c "import ai_automate_quote; print('Wheel installed successfully!')"
+      # - name: Verify installation
+      #   run: |
+      #     python -c "import ai_automate_quote; print('Wheel installed successfully!')"
 
       - name: Install private repo manually using GitHub token
         env:
