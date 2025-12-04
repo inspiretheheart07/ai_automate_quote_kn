@@ -114,7 +114,7 @@ jobs:
         env:
            GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-           pip install git+https://$GH_TOKEN@github.com/simplycodesmart/Vionix.git@v0.1.0
+           pip install git+https://$GH_TOKEN@github.com/simplycodesmart/Vionix.git@0.1.0
 
 
 
