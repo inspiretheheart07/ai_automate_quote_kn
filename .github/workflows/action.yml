@@ -198,5 +198,5 @@ jobs:
 
       - name: Run Process
         run: |
-          echo "Running te_quote.py with random number ${{ steps.random_number.outputs.number }}"
+          echo "Running main.py with random number ${{ steps.random_number.outputs.number }}"
           python main.py "${{ steps.random_number.outputs.number }}"
