@@ -80,7 +80,7 @@ jobs:
           REPO="Vionix"
         
           # Fetch release metadata
-          API_URL="https://api.github.com/repos/$OWNER/$REPO/releases/tags/0.1.0"
+          API_URL="https://api.github.com/repos/$OWNER/$REPO/releases/tags/$RELEASE_TAG"
           RESPONSE=$(curl -s -H "Authorization: token $GH_TOKEN" "$API_URL")
         
           # Get the actual wheel asset name
@@ -107,13 +107,6 @@ jobs:
         
           echo "Installing: $WHEEL_NAME"
           pip install "$WHEEL_NAME"
-
-      - name: Install private repo manually using GitHub token
-        env:
-           GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          pip install "https://${{ secrets.GH_TOKEN }}:x-oauth-basic@github.com/simplycodesmart/Vionix/releases/download/0.1.0/vionix-0.1.0-py3-none-any.whl"
-
       - name: Install dependencies
         run: pip install -r requirements.txt
 
