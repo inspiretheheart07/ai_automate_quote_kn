@@ -1,0 +1,30 @@
+{
+  	"quote_file": "quote.json",
+	"voice_description": "Anu speaks with a slightly higher pitch in a close-sounding environment. Her voice is clear, with subtle emotional depth and a normal pace, all captured in high-quality recording.",
+	"audio_file": "quote_audio_kn.wav",
+	"video_file": "output_video_kn.mp4",
+	"duration": 55,
+	"fps": 24,
+	"language": "Kannada",
+	"enabled": true,
+	"font":"font_kn.ttf",
+	"background":"quote_bg.png",
+	"bgm_volume": 0.80,
+	"upload_cfg": {
+		"yt": {
+			"enabled": false,
+			"client_secrets_file": "client_secrets.json"
+		},
+		"aws": {
+			"s3": {
+				"enabled": false
+			}
+		},
+		"fb": {
+			"enabled": false
+		},
+		"ig": {
+			"enabled": false
+		}
+	}
+}
