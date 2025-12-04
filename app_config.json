@@ -12,19 +12,19 @@
 	"bgm_volume": 0.80,
 	"upload_cfg": {
 		"yt": {
-			"enabled": false,
+			"enabled": true,
 			"client_secrets_file": "client_secrets.json"
 		},
 		"aws": {
 			"s3": {
-				"enabled": false
+				"enabled": true
 			}
 		},
 		"fb": {
-			"enabled": false
+			"enabled": true
 		},
 		"ig": {
-			"enabled": false
+			"enabled": true
 		}
 	}
 }
