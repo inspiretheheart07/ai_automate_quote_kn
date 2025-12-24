@@ -1,0 +1,43 @@
+name: Vionix Install
+
+on:
+  workflow_run:
+    workflows: ["Vionix Setup"]
+    types:
+      - completed
+
+jobs:
+  install:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Restore pip cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+
+      - name: Install private wheel
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          RELEASE_TAG: ${{ secrets.RELEASE_TAG }}
+        run: |
+          sudo apt-get update && sudo apt-get install -y jq
+          OWNER="simplycodesmart"
+          REPO="Vionix"
+          API_URL="https://api.github.com/repos/$OWNER/$REPO/releases/tags/$RELEASE_TAG"
+          RESPONSE=$(curl -s -H "Authorization: token $GH_TOKEN" "$API_URL")
+          WHEEL_NAME=$(echo "$RESPONSE" | jq -r '.assets[] | select(.name | endswith(".whl")) | .name')
+          WHEEL_URL=$(echo "$RESPONSE" | jq -r '.assets[] | select(.name == "'$WHEEL_NAME'") | .url')
+          curl -L -H "Authorization: token $GH_TOKEN" -H "Accept: application/octet-stream" "$WHEEL_URL" -o "$WHEEL_NAME"
+          pip install "$WHEEL_NAME"
+
+      - name: Install requirements
+        run: pip install -r requirements.txt

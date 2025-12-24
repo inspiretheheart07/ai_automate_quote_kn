@@ -1,0 +1,34 @@
+name: Vionix Prepare Assets
+
+on:
+  workflow_run:
+    workflows: ["Vionix Install"]
+    types:
+      - completed
+
+jobs:
+  prepare:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Write OAuth files
+        run: |
+          python - <<'EOF'
+          import json, os
+          with open('client_secrets.json', 'w') as f:
+              json.dump(json.loads(os.environ['JSON_CLIENT_YT']), f, indent=2)
+          with open('oauth.json', 'w') as f:
+              json.dump(json.loads(os.environ['JSON_OAUTH_YT']), f, indent=2)
+          EOF
+        env:
+          JSON_CLIENT_YT: ${{ secrets.JSON_CLIENT_YT }}
+          JSON_OAUTH_YT: ${{ secrets.JSON_OAUTH_YT }}
+
+      - name: Copy assets
+        run: |
+          cp assets/bg.png .
+          cp assets/font_kn.ttf .
+          cp assets/output_image.png .
