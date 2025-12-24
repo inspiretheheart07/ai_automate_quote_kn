@@ -5,6 +5,46 @@ on:
   schedule:
     - cron: "0 2,5,10,13 * * *"
 
+env:
+  GEMENI_KEY: ${{ secrets.GEMENI_KEY }}
+  GEMENI_MODEL: ${{ secrets.GEMENI_MODEL }}
+  ADJECTIVES: ${{ secrets.ADJECTIVES }}
+  THEMES: ${{ secrets.THEMES }}
+  LANGUAGE: ${{ secrets.LANGUAGE }}
+
+  S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
+  S3_SECRETE_KEY: ${{ secrets.S3_SECRETE_KEY }}
+  S3_ZONE: ${{ secrets.S3_ZONE }}
+  S3_BUCKET: ${{ secrets.S3_BUCKET }}
+  S3_URL: ${{ secrets.S3_URL }}
+
+  FB_VERSION: ${{ secrets.FB_VERSION }}
+  FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+  FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+
+  INSTA_PAGE_ID: ${{ secrets.INSTA_PAGE_ID }}
+  INSTA_PAGE_TOKEN: ${{ secrets.INSTA_PAGE_TOKEN }}
+
+  THREADS_VERSION: ${{ secrets.THREADS_VERSION }}
+  THREADS_PAGE_ID: ${{ secrets.THREADS_PAGE_ID }}
+  THREADS_PAGE_TOKEN: ${{ secrets.THREADS_PAGE_TOKEN }}
+
+  YT_JSON: ${{ secrets.YT_JSON }}
+  JSON_CLIENT_YT: ${{ secrets.JSON_CLIENT_YT }}
+  JSON_OAUTH_YT: ${{ secrets.JSON_OAUTH_YT }}
+
+  HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
+  PINTEREST_CLIENT_ID: ${{ secrets.PINTEREST_CLIENT_ID }}
+  PINTEREST_CLIENT_SECRET: ${{ secrets.PINTEREST_CLIENT_SECRET }}
+  PINTEREST_ACCESS_TOKEN: ${{ secrets.PINTEREST_ACCESS_TOKEN }}
+  PINTEREST_BOARD_ID: ${{ secrets.PINTEREST_BOARD_ID }}
+  PINTEREST_REFRESH_TOKEN: ${{ secrets.PINTEREST_REFRESH_TOKEN }}
+  PINTEREST_API_URL: ${{ secrets.PINTEREST_API_URL }}
+  PINTEREST_STATIC_DOMINANT_COLOR: ${{ secrets.PINTEREST_STATIC_DOMINANT_COLOR }}
+
+  VIONIX_GIST_ID: ${{ secrets.VIONIX_GIST_ID }}
+
 jobs:
 
 # -------------------------------------------------
@@ -17,15 +57,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
-      # Ensure pip cache dir exists (FIXES WARNING)
       - name: Prepare pip cache directory
-        run: |
-          mkdir -p ~/.cache/pip
+        run: mkdir -p ~/.cache/pip
 
       - name: Cache pip
         uses: actions/cache@v4
@@ -53,7 +91,7 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Restore pip cache
         uses: actions/cache@v4
@@ -64,19 +102,33 @@ jobs:
       - name: Upgrade pip
         run: python -m pip install --upgrade pip
 
-      - name: Install private wheel
+      - name: Install private Vionix wheel
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           RELEASE_TAG: ${{ secrets.RELEASE_TAG }}
         run: |
           sudo apt-get update && sudo apt-get install -y jq
+
           OWNER="simplycodesmart"
           REPO="Vionix"
           API_URL="https://api.github.com/repos/$OWNER/$REPO/releases/tags/$RELEASE_TAG"
+
           RESPONSE=$(curl -s -H "Authorization: token $GH_TOKEN" "$API_URL")
           WHEEL_NAME=$(echo "$RESPONSE" | jq -r '.assets[] | select(.name | endswith(".whl")) | .name')
+
+          if [ -z "$WHEEL_NAME" ]; then
+            echo "❌ No wheel found for tag $RELEASE_TAG"
+            exit 1
+          fi
+
           WHEEL_URL=$(echo "$RESPONSE" | jq -r '.assets[] | select(.name == "'$WHEEL_NAME'") | .url')
-          curl -L -H "Authorization: token $GH_TOKEN" -H "Accept: application/octet-stream" "$WHEEL_URL" -o "$WHEEL_NAME"
+
+          curl -L \
+            -H "Authorization: token $GH_TOKEN" \
+            -H "Accept: application/octet-stream" \
+            "$WHEEL_URL" \
+            -o "$WHEEL_NAME"
+
           pip install "$WHEEL_NAME"
 
       - name: Install requirements
@@ -97,14 +149,11 @@ jobs:
         run: |
           python - <<'EOF'
           import json, os
-          with open('client_secrets.json', 'w') as f:
-              json.dump(json.loads(os.environ['JSON_CLIENT_YT']), f, indent=2)
-          with open('oauth.json', 'w') as f:
-              json.dump(json.loads(os.environ['JSON_OAUTH_YT']), f, indent=2)
+          with open("client_secrets.json", "w") as f:
+              json.dump(json.loads(os.environ["JSON_CLIENT_YT"]), f, indent=2)
+          with open("oauth.json", "w") as f:
+              json.dump(json.loads(os.environ["JSON_OAUTH_YT"]), f, indent=2)
           EOF
-        env:
-          JSON_CLIENT_YT: ${{ secrets.JSON_CLIENT_YT }}
-          JSON_OAUTH_YT: ${{ secrets.JSON_OAUTH_YT }}
 
       - name: Copy assets
         run: |
@@ -116,12 +165,47 @@ jobs:
 # 4️⃣ RUN
 # -------------------------------------------------
   run:
-    name: 🚀 Run Vionix
+    name: 🚀 Run Vionix Pipeline
     runs-on: ubuntu-latest
     needs: prepare
 
     steps:
       - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Restore pip cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+
+      - name: Install Vionix + deps (required for this job)
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          RELEASE_TAG: ${{ secrets.RELEASE_TAG }}
+        run: |
+          python -m pip install --upgrade pip
+          sudo apt-get update && sudo apt-get install -y jq
+
+          OWNER="simplycodesmart"
+          REPO="Vionix"
+          API_URL="https://api.github.com/repos/$OWNER/$REPO/releases/tags/$RELEASE_TAG"
+
+          RESPONSE=$(curl -s -H "Authorization: token $GH_TOKEN" "$API_URL")
+          WHEEL_NAME=$(echo "$RESPONSE" | jq -r '.assets[] | select(.name | endswith(".whl")) | .name')
+          WHEEL_URL=$(echo "$RESPONSE" | jq -r '.assets[] | select(.name == "'$WHEEL_NAME'") | .url')
+
+          curl -L \
+            -H "Authorization: token $GH_TOKEN" \
+            -H "Accept: application/octet-stream" \
+            "$WHEEL_URL" \
+            -o "$WHEEL_NAME"
+
+          pip install "$WHEEL_NAME"
+          pip install -r requirements.txt
 
       - name: Pick random music
         id: music
