@@ -1,8 +1,8 @@
 import json
 import sys
-
-from Vionix.pipeline import LanguagePipeline
-from Vionix.utils import VionixError, get_logger
+from Vionix.pipeline.language_pipeline import LanguagePipeline
+from Vionix.utils.logger import get_logger
+from Vionix.utils.exceptions import VionixError
 
 logger = get_logger()
 
